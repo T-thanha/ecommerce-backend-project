@@ -66,4 +66,14 @@ export class UserService {
       throw new HttpException(error, 500);
     }
   }
+  async SignOut(res, req) {
+    try {
+      const user = req['user'];
+      const revoke_token = await this.tokenRepository.update( { user_id: user.id }, { is_revoked: true });
+      res.clearCookie('token');
+      throw new HttpException('User logged out successfully', 200);
+    } catch (error) {
+      throw new HttpException(error, 500);
+    }
+  }
 }
