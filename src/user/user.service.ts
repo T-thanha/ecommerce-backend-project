@@ -60,16 +60,21 @@ export class UserService {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
+      throw new HttpException('User logged in successfully', 200);
     } catch (error) {
       throw new HttpException(error, 500);
     }
   }
+
   async SignOut(res, req) {
     try {
       const user = req['user'];
-      const revoke_token = await this.tokenRepository.update( { user_id: user.id }, { is_revoked: true });
+      const revoke_token = await this.tokenRepository.update(
+        { user_id: user.id },
+        { is_revoked: true },
+      );
       res.clearCookie('token');
       throw new HttpException('User logged out successfully', 200);
     } catch (error) {
