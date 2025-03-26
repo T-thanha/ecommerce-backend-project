@@ -39,7 +39,7 @@ export class UserService {
         user.password,
       );
       if (!isPasswordMatch) {
-        throw new HttpException('Invalid credentials', 401);
+        throw new HttpException('User not found', 404);
       }
       const payload = {
         email: user.email,
@@ -50,7 +50,7 @@ export class UserService {
       };
       const token = await this.jwtService.sign(payload);
       const is_token_created = await this.tokenRepository.save({
-        user_id: user.id,
+        userId: user.id,
         token,
       });
       if (!is_token_created) {
@@ -59,7 +59,7 @@ export class UserService {
       res.cookie('token', token, {
         httpOnly: true,
         secure: true,
-        sameSite: 'none',
+        sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
       throw new HttpException('User logged in successfully', 200);
@@ -71,14 +71,17 @@ export class UserService {
   async SignOut(res, req) {
     try {
       const user = req['user'];
-      const revoke_token = await this.tokenRepository.update(
-        { user_id: user.id },
-        { is_revoked: true },
-      );
+      const token_property = await this.tokenRepository.findOne({ where: { userId:user.id } });
+      if (!token_property) {
+	      throw new HttpException('Token not found!', 404);
+      }
+      token_property.is_revoked = true;
+      await this.tokenRepository.save(token_property);
       res.clearCookie('token');
       throw new HttpException('User logged out successfully', 200);
     } catch (error) {
       throw new HttpException(error, 500);
     }
   }
+
 }

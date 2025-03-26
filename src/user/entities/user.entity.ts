@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 enum role {
@@ -36,7 +37,7 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
-  @OneToMany(() => Token, (token) => token.user_id)
+  @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];
 }
 
@@ -45,12 +46,13 @@ export class Token {
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
-  user_id: number;
+  userId: number;
   @Column()
   token: string;
   @Column({ default: false })
   is_revoked: boolean;
 
   @ManyToOne(() => User, (user) => user.tokens)
+  @JoinColumn({ name:'userId' })
   user: User;
 }
