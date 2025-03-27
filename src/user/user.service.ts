@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SignInDto } from './dto/signin-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto'
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Token, User } from './entities/user.entity';
@@ -23,7 +24,7 @@ export class UserService {
         throw new HttpException('User created successfully', 200);
       }
     } catch (error) {
-      throw new HttpException(error, 500);
+      throw new HttpException(error.message || 'Internal server error', 500);
     }
   }
 
@@ -32,14 +33,14 @@ export class UserService {
       const email = signUserDto.email;
       const user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
-        throw new HttpException('User not found', 404);
+        throw new HttpException('Email or password is incorrect!', 404);
       }
       const isPasswordMatch = await bcrypt.compare(
         signUserDto.password,
         user.password,
       );
       if (!isPasswordMatch) {
-        throw new HttpException('User not found', 404);
+        throw new HttpException('Email or password is incorrect!', 404);
       }
       const payload = {
         email: user.email,
@@ -64,8 +65,44 @@ export class UserService {
       });
       throw new HttpException('User logged in successfully', 200);
     } catch (error) {
-      throw new HttpException(error, 500);
+      throw new HttpException(error.message || 'Internal server error', 500);
     }
+  }
+
+  async GetUserDetail(res,req) {
+    try {
+	const user = req['user'];
+	const user_detail = await this.userRepository.findOne( { where: { id:user.id }, select:['id','username','email','first_name','last_name','address','tel_num','created_at','updated_at','role'] } );
+    	if (!user_detail) {
+	   throw new HttpException('User not found!',404);
+	}
+	return user_detail;
+    }
+    catch (error) {
+      throw new HttpException(error.message || 'Internal server error', 500);
+    }
+  }
+
+  async UpdateUserDetail(updateUserDto : UpdateUserDto , res, req) {
+	try {
+		const user = req['user'];
+		const user_property = await this.userRepository.findOne({ where:{ id:user.id } });
+		if (!user_property) {
+			throw new HttpException('User not found!', 404);
+		}
+		user_property.first_name = updateUserDto.first_name;
+		user_property.last_name = updateUserDto.last_name;
+		user_property.address = updateUserDto.address;
+		if (!updateUserDto.email) {
+			user_property.email = updateUserDto.email;
+		}
+		if (!updateUserDto.old_password && updateUserDto.new_password == updateUserDto.confirm_new_password) {
+			user_property.password = await bcrypt.hash(updateUserDto.new_password,10);
+		}
+	}
+	catch (error) {
+		throw new HttpException(error.message || 'Internal server error',500);
+	}
   }
 
   async SignOut(res, req) {
@@ -80,8 +117,7 @@ export class UserService {
       res.clearCookie('token');
       throw new HttpException('User logged out successfully', 200);
     } catch (error) {
-      throw new HttpException(error, 500);
+      throw new HttpException(error.message || 'Internal server error', 500);
     }
   }
-
 }
