@@ -94,6 +94,10 @@ export class UserService {
 		user_property.last_name = updateUserDto.last_name;
 		user_property.address = updateUserDto.address;
 		if (!updateUserDto.email) {
+			const email_already_exists = await this.userRepository.findOne({ where:{ email:updateUserDto.email } });
+			if (email_already_exists) {
+				throw new HttpException('Email already exists',409);
+			}
 			user_property.email = updateUserDto.email;
 		}
 		if (!updateUserDto.old_password && updateUserDto.new_password == updateUserDto.confirm_new_password) {
