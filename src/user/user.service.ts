@@ -99,6 +99,8 @@ export class UserService {
 		if (!updateUserDto.old_password && updateUserDto.new_password == updateUserDto.confirm_new_password) {
 			user_property.password = await bcrypt.hash(updateUserDto.new_password,10);
 		}
+		await this.userRepository.save(user_property);
+		throw new HttpException('User detail updated',200);
 	}
 	catch (error) {
 		throw new HttpException(error.message || 'Internal server error',500);
