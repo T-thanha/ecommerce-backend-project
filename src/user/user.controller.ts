@@ -28,14 +28,14 @@ export class UserController {
   }
 
   @UseGuards(UserGuard)
-  @Post('updateuserdetail')
-  UpdateUserDetail(@Res() res, @Req() req, updateUserDto: UpdateUserDto) {
-    return this.userService.UpdateUserDetail(updateUserDto,res,req);
+  @Post('profile')
+  UpdateUserProfile(@Res() res, @Req() req, updateUserDto: UpdateUserDto) {
+    return this.userService.UpdateUserProfile(updateUserDto,res,req);
   }
   @UseGuards(UserGuard)
-  @Get('userdetail')
-  GetUserDetail(@Res() res, @Req() req) {
-    return this.userService.GetUserDetail(res, req);
+  @Get('profile')
+  GetUserProfile(@Res() res, @Req() req) {
+    return this.userService.GetUserProfile(res, req);
   }
 
   @UseGuards(UserGuard)

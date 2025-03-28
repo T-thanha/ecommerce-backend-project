@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SignInDto } from './dto/signin-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto'
+import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Token, User } from './entities/user.entity';
@@ -21,7 +21,7 @@ export class UserService {
       User.password = await bcrypt.hash(User.password, 10);
       const is_created = await this.userRepository.save(User);
       if (is_created) {
-        return res.status(200).json({message:'User created successfully'});
+        return res.status(200).json({ message: 'User created successfully' });
       }
     } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
@@ -63,65 +63,89 @@ export class UserService {
         sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
-      return res.status(200).json({message:'User logged in successfully'});
+      return res.status(200).json({ message: 'User logged in successfully' });
     } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
     }
   }
 
-  async GetUserDetail(res,req) {
+  async GetUserProfile(res, req) {
     try {
-	const user = req['user'];
-	const user_detail = await this.userRepository.findOne( { where: { id:user.id }, select:['id','username','email','first_name','last_name','address','tel_num','created_at','updated_at','role'] } );
-    	if (!user_detail) {
-	   throw new HttpException('User not found!',404);
-	}
-	return res.status(200).json({user_detail});
-    }
-    catch (error) {
+      const user = req['user'];
+      const user_detail = await this.userRepository.findOne({
+        where: { id: user.id },
+        select: [
+          'id',
+          'username',
+          'email',
+          'first_name',
+          'last_name',
+          'address',
+          'tel_num',
+          'created_at',
+          'updated_at',
+          'role',
+        ],
+      });
+      if (!user_detail) {
+        throw new HttpException('User not found!', 404);
+      }
+      return res.status(200).json({ user_detail });
+    } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
     }
   }
 
-  async UpdateUserDetail(updateUserDto : UpdateUserDto , res, req) {
-	try {
-		const user = req['user'];
-		const user_property = await this.userRepository.findOne({ where:{ id:user.id } });
-		if (!user_property) {
-			throw new HttpException('User not found!', 404);
-		}
-		user_property.first_name = updateUserDto.first_name;
-		user_property.last_name = updateUserDto.last_name;
-		user_property.address = updateUserDto.address;
-		if (!updateUserDto.email) {
-			const email_already_exists = await this.userRepository.findOne({ where:{ email:updateUserDto.email } });
-			if (email_already_exists) {
-				throw new HttpException('Email already exists',409);
-			}
-			user_property.email = updateUserDto.email;
-		}
-		if (!updateUserDto.old_password && updateUserDto.new_password == updateUserDto.confirm_new_password) {
-			user_property.password = await bcrypt.hash(updateUserDto.new_password,10);
-		}
-		const updated_user = await this.userRepository.save(user_property);
-		return res.status(200).json({updated_user});
-	}
-	catch (error) {
-		throw new HttpException(error.message || 'Internal server error',500);
-	}
+  async UpdateUserProfile(updateUserDto: UpdateUserDto, res, req) {
+    try {
+      const user = req['user'];
+      const user_property = await this.userRepository.findOne({
+        where: { id: user.id },
+      });
+      if (!user_property) {
+        throw new HttpException('User not found!', 404);
+      }
+      user_property.first_name = updateUserDto.first_name;
+      user_property.last_name = updateUserDto.last_name;
+      user_property.address = updateUserDto.address;
+      if (!updateUserDto.email) {
+        const email_already_exists = await this.userRepository.findOne({
+          where: { email: updateUserDto.email },
+        });
+        if (email_already_exists) {
+          throw new HttpException('Email already exists', 409);
+        }
+        user_property.email = updateUserDto.email;
+      }
+      if (
+        !updateUserDto.old_password &&
+        updateUserDto.new_password == updateUserDto.confirm_new_password
+      ) {
+        user_property.password = await bcrypt.hash(
+          updateUserDto.new_password,
+          10,
+        );
+      }
+      const updated_user = await this.userRepository.save(user_property);
+      return res.status(200).json({ updated_user });
+    } catch (error) {
+      throw new HttpException(error.message || 'Internal server error', 500);
+    }
   }
 
   async SignOut(res, req) {
     try {
       const user = req['user'];
-      const token_property = await this.tokenRepository.findOne({ where: { userId:user.id } });
+      const token_property = await this.tokenRepository.findOne({
+        where: { userId: user.id },
+      });
       if (!token_property) {
-	      throw new HttpException('Token not found!', 404);
+        throw new HttpException('Token not found!', 404);
       }
       token_property.is_revoked = true;
       await this.tokenRepository.save(token_property);
       res.clearCookie('token');
-      return res.status(200).json({message:'User logged out successfully'});
+      return res.status(200).json({ message: 'User logged out successfully' });
     } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
     }
