@@ -15,13 +15,13 @@ export class UserService {
     @InjectRepository(Token) private tokenRepository: Repository<Token>,
     private jwtService: JwtService,
   ) {}
-  async SignUp(createUserDto: CreateUserDto) {
+  async SignUp(createUserDto: CreateUserDto, res) {
     try {
       const User = createUserDto;
       User.password = await bcrypt.hash(User.password, 10);
       const is_created = await this.userRepository.save(User);
       if (is_created) {
-        throw new HttpException('User created successfully', 200);
+        return res.status(200).json({message:'User created successfully'});
       }
     } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
@@ -63,7 +63,7 @@ export class UserService {
         sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
-      throw new HttpException('User logged in successfully', 200);
+      return res.status(200).json({message:'User logged in successfully'});
     } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
     }
@@ -76,7 +76,7 @@ export class UserService {
     	if (!user_detail) {
 	   throw new HttpException('User not found!',404);
 	}
-	return user_detail;
+	return res.status(200).json({user_detail});
     }
     catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
@@ -103,8 +103,8 @@ export class UserService {
 		if (!updateUserDto.old_password && updateUserDto.new_password == updateUserDto.confirm_new_password) {
 			user_property.password = await bcrypt.hash(updateUserDto.new_password,10);
 		}
-		await this.userRepository.save(user_property);
-		throw new HttpException('User detail updated',200);
+		const updated_user = await this.userRepository.save(user_property);
+		return res.status(200).json({updated_user});
 	}
 	catch (error) {
 		throw new HttpException(error.message || 'Internal server error',500);
@@ -121,7 +121,7 @@ export class UserService {
       token_property.is_revoked = true;
       await this.tokenRepository.save(token_property);
       res.clearCookie('token');
-      throw new HttpException('User logged out successfully', 200);
+      return res.status(200).json({message:'User logged out successfully'});
     } catch (error) {
       throw new HttpException(error.message || 'Internal server error', 500);
     }
