@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User,Token]),
+    TypeOrmModule.forFeature([User, Token]),
     JwtModule.register({
       global: true,
       secret: 'test-key',

@@ -7,7 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 
-enum role {
+export enum role {
   ADMIN = 'admin',
   USER = 'user',
 }
@@ -53,6 +53,6 @@ export class Token {
   is_revoked: boolean;
 
   @ManyToOne(() => User, (user) => user.tokens)
-  @JoinColumn({ name:'userId' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 }

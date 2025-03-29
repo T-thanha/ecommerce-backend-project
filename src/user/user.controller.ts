@@ -19,7 +19,7 @@ export class UserController {
 
   @Post('register')
   SignUp(@Body() createUserDto: CreateUserDto, @Res() res) {
-    return this.userService.SignUp(createUserDto,res);
+    return this.userService.SignUp(createUserDto, res);
   }
 
   @Post('login')
@@ -30,7 +30,7 @@ export class UserController {
   @UseGuards(UserGuard)
   @Post('profile')
   UpdateUserProfile(@Res() res, @Req() req, updateUserDto: UpdateUserDto) {
-    return this.userService.UpdateUserProfile(updateUserDto,res,req);
+    return this.userService.UpdateUserProfile(updateUserDto, res, req);
   }
   @UseGuards(UserGuard)
   @Get('profile')
@@ -41,6 +41,6 @@ export class UserController {
   @UseGuards(UserGuard)
   @Get('logout')
   SignOut(@Res() res, @Req() req) {
-    return this.userService.SignOut(res,req);
+    return this.userService.SignOut(res, req);
   }
 }
