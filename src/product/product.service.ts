@@ -141,6 +141,12 @@ export class ProductService {
       if (!prod_prop) {
         throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
       }
+      const prod_img = await this.prodImageRepo.find({
+        where: { productId: id },
+      });
+      prod_img.forEach((img) => {
+        this.prodImageRepo.remove(img);
+      });
       const is_deleted = await this.productRepo.remove(prod_prop);
       if (!is_deleted) {
         throw new HttpException(

@@ -34,7 +34,7 @@ export class Product_image {
   productId: number;
   @Column()
   image_type: string;
-  @Column({ type: 'blob' })
+  @Column({ type: 'longblob' })
   image: Buffer;
 
   @ManyToOne(() => Product, (product) => product.id)
