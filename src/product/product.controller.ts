@@ -6,9 +6,12 @@ import {
   UseGuards,
   Res,
   UseInterceptors,
-  UploadedFiles,
+  UploadedFile,
   Delete,
   Put,
+  Req,
+  ParseFilePipeBuilder,
+  Body,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -31,14 +34,25 @@ export class ProductController {
   }
 
   @UseGuards(UserGuard)
-  @Post()
   @UseInterceptors(FileInterceptor('image'))
+  @Post()
   AddProduct(
+    @Body()
     createProductDto: CreateProductDto,
-    @UploadedFiles() image: Array<Express.Multer.File>,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: 'image/jpeg',
+        })
+        .build({
+          fileIsRequired: false,
+        }),
+    )
+    image: Express.Multer.File,
     @Res() res,
+    @Req() req,
   ) {
-    return this.productService.AddProduct(createProductDto, image, res);
+    return this.productService.AddProduct(createProductDto, image, res, req);
   }
 
   @UseGuards(UserGuard)
@@ -46,14 +60,20 @@ export class ProductController {
   UpdateProductById(
     @Res() res,
     @Param() param,
+    @Req() req,
     updateProductDto: UpdateProductDto,
   ) {
-    return this.productService.EditProduct(res, param.id, updateProductDto);
+    return this.productService.EditProduct(
+      res,
+      req,
+      param.id,
+      updateProductDto,
+    );
   }
 
   @UseGuards(UserGuard)
   @Delete(':id')
-  DeleteProduct(@Res() res, @Param() param) {
-    return this.productService.DeleteProduct(res, param.id);
+  DeleteProduct(@Res() res, @Req() req, @Param() param) {
+    return this.productService.DeleteProduct(res, req, param.id);
   }
 }

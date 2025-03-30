@@ -43,6 +43,7 @@ export class UserService {
         throw new HttpException('Email or password is incorrect!', 404);
       }
       const payload = {
+        id: user.id,
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
@@ -59,7 +60,7 @@ export class UserService {
       }
       res.cookie('token', token, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         sameSite: 'strict',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
@@ -71,11 +72,10 @@ export class UserService {
 
   async GetUserProfile(res, req) {
     try {
-      const user = req['user'];
+      const user = await req.user;
       const user_detail = await this.userRepository.findOne({
         where: { id: user.id },
         select: [
-          'id',
           'username',
           'email',
           'first_name',
@@ -98,7 +98,7 @@ export class UserService {
 
   async UpdateUserProfile(updateUserDto: UpdateUserDto, res, req) {
     try {
-      const user = req['user'];
+      const user = await req.user;
       const user_property = await this.userRepository.findOne({
         where: { id: user.id },
       });
@@ -135,7 +135,7 @@ export class UserService {
 
   async SignOut(res, req) {
     try {
-      const user = req['user'];
+      const user = await req.user;
       const token_property = await this.tokenRepository.findOne({
         where: { userId: user.id },
       });

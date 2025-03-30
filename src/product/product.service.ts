@@ -20,6 +20,7 @@ export class ProductService {
     @InjectRepository(Product_choice)
     private prodChoiceRepo: Repository<Product_choice>,
   ) {}
+
   async GetProduct(res) {
     const prod_property = await this.productRepo.find();
     const prod_img = await this.prodImageRepo.find();
@@ -31,7 +32,7 @@ export class ProductService {
       prod_and_image,
     });
   }
-
+  //------------------------------------------------------------------------
   async GetProductById(res, id) {
     const prod_prop = await this.productRepo.findOne({ where: { id: id } });
     if (!prod_prop) {
@@ -48,14 +49,15 @@ export class ProductService {
       prod_and_image,
     });
   }
-
+  //------------------------------------------------------------------------
   async AddProduct(
     createProductDto: CreateProductDto,
-    image: Array<Express.Multer.File>,
+    image: Express.Multer.File,
     res,
+    req,
   ) {
     try {
-      const user = res['user'];
+      const user = await req.user;
       const user_property = await this.userRepo.findOne({
         where: { id: user.id, email: user.email },
       });
@@ -68,23 +70,15 @@ export class ProductService {
           HttpStatus.UNAUTHORIZED,
         );
       }
-      image.forEach((img) => {
-        if (img.mimetype != 'image/jpeg') {
-          throw new HttpException(
-            'Image type must be jpg',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-      });
+
       const prod_prop = await this.productRepo.save(createProductDto);
 
-      image.forEach((img) => {
-        const _proImg = new Product_image();
-        _proImg.productId = prod_prop.id;
-        _proImg.image_type = img.mimetype;
-        _proImg.image = img.buffer;
-        this.prodImageRepo.save(_proImg);
-      });
+      const proImg = new Product_image();
+      proImg.productId = prod_prop.id;
+      proImg.image_type = image.mimetype;
+      proImg.image = image.buffer;
+      this.prodImageRepo.save(proImg);
+
       return res.status(HttpStatus.OK).json({
         message: 'Product created susscessfully',
         product: prod_prop,
@@ -96,9 +90,22 @@ export class ProductService {
       );
     }
   }
-
-  async EditProduct(res, id, updateProductDto: UpdateProductDto) {
+  //------------------------------------------------------------------------
+  async EditProduct(res, req, id, updateProductDto: UpdateProductDto) {
     try {
+      const user = await req.user;
+      const user_property = await this.userRepo.findOne({
+        where: { id: user.id },
+      });
+      if (!user_property) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      if (user_property.role != role.ADMIN) {
+        throw new HttpException(
+          "You don't have permission to access",
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
       const prod_prop = await this.productRepo.findOne({ where: { id: id } });
       if (!prod_prop) {
         throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
@@ -114,9 +121,22 @@ export class ProductService {
       );
     }
   }
-
-  async DeleteProduct(res, id) {
+  //------------------------------------------------------------------------
+  async DeleteProduct(res, req, id) {
     try {
+      const user = await req.user;
+      const user_property = await this.userRepo.findOne({
+        where: { id: user.id, email: user.email },
+      });
+      if (!user_property) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      if (user_property.role != role.ADMIN) {
+        throw new HttpException(
+          "You don't have permision to access",
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
       const prod_prop = await this.productRepo.findOne({ where: { id: id } });
       if (!prod_prop) {
         throw new HttpException('Product not found', HttpStatus.NOT_FOUND);

@@ -4,8 +4,10 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Entity,
 } from 'typeorm';
 
+@Entity({ name: 'products' })
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,6 +26,7 @@ export class Product {
   product_image: Product_image[];
 }
 
+@Entity({ name: 'product_image' })
 export class Product_image {
   @PrimaryGeneratedColumn()
   id: number;
@@ -39,6 +42,7 @@ export class Product_image {
   product: Product;
 }
 
+@Entity({ name: 'product_choice' })
 export class Product_choice {
   @PrimaryGeneratedColumn()
   id: number;
