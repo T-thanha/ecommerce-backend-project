@@ -1,3 +1,4 @@
+import { Cart_items } from 'src/cart/entities/cart.entity';
 import {
   PrimaryGeneratedColumn,
   Column,
@@ -24,6 +25,8 @@ export class Product {
   product_choice: Product_choice[];
   @OneToMany(() => Product_image, (product_image) => product_image.product)
   product_image: Product_image[];
+  @OneToMany(() => Cart_items, (cart_items) => cart_items.product)
+  cart_items: Cart_items;
 }
 
 @Entity({ name: 'product_image' })
