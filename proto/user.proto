@@ -1,0 +1,106 @@
+syntax = 'proto3';
+
+package user;
+
+service UserService {
+  rpc SignUp (SignUpRequest) returns (SignUpResponse);
+  rpc SignIn (SignInRequest) returns (SignInResponse);
+  rpc SignOut (SignOutRequest) returns (SignOutResponse);
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
+  rpc UpdateUserProfile (UpdateUserProfileRequest) returns (UpdateUserProfileResponse);
+  rpc ResetUserPassword (ResetUserPasswordRequest) returns (ResetUserPasswordResponse);
+}
+
+message ErrorResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ResetUserPasswordRequest {
+  int32 user_id = 1;
+  string email = 2;
+  string old_password = 3;
+  string new_password = 4;
+}
+message ResetUserPasswordResponse {
+  ErrorResponse error =1 ;
+}
+
+message UpdateUserProfileRequest {
+  int32 user_id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string address = 5;
+  string tel_num = 6;
+}
+
+message UpdateUserProfileResponse {
+  UpdateUserProfileRequest response = 1;
+  ErrorResponse error = 2;
+}
+
+message SignUpRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message SignUpResponse {
+  int32 id = 1;
+  string email = 2;
+  string created_at = 3;
+  ErrorResponse error = 4;
+}
+
+message SignInRequest {
+  string email = 1;
+  string password =2;
+}
+
+message SignInResponse {
+  string token = 1;
+  ErrorResponse error = 2;
+}
+
+message SignOutRequest {
+  int32 user_id = 1;
+  string email = 2;
+  string token = 3;
+}
+
+message SignOutResponse {
+  bool is_success = 1;
+  ErrorResponse error = 2;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool is_valid = 1;
+  int32 user_id = 2;
+  string email = 3;
+  ErrorResponse error = 4;
+}
+
+message GetUserProfileRequest {
+  int32 user_id = 1;
+  string email = 2;
+}
+
+message GetUserProfileResponse {
+  int32 id = 1;
+  string username = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string address = 6;
+  string tel_num = 7;
+  string role = 8;
+  string created_at = 9;
+  string updated_at = 10;
+  ErrorResponse error = 11;
+}

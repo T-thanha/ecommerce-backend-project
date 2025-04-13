@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  mariadb1:
+    image: mariadb:latest
+    container_name: mariadb1
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce-user
+    ports:
+      - '3306:3306'
+    volumes:
+      - mariadb1_data:/var/lib/mysql
+
+  mariadb2:
+    image: mariadb:latest
+    container_name: mariadb2
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce-product
+    ports:
+      - '3307:3306'
+    volumes:
+      - mariadb2_data:/var/lib/mysql
+
+  mariadb3:
+    image: mariadb:latest
+    container_name: mariadb3
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce-cart
+    ports:
+      - '3308:3306'
+    volumes:
+      - mariadb3_data:/var/lib/mysql
+
+  mariadb4:
+    image: mariadb:latest
+    container_name: mariadb4
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ecommerce-order
+    ports:
+      - '3309:3306'
+    volumes:
+      - mariadb4_data:/var/lib/mysql
+
+volumes:
+  mariadb1_data:
+  mariadb2_data:
+  mariadb3_data:
+  mariadb4_data:
